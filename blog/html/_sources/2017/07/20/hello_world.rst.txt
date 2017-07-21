@@ -1,7 +1,7 @@
 Around the 'ville
 ==================
 
-Gaudy Lawn Fountains and Claustrophobic Walks
+Gaudy Lawn Fountains
 
 
 
