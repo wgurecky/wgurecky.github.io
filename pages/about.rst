@@ -1,7 +1,7 @@
 About
 =====
 
-:download:`Curriculum Vitae <cv/resume.pdf>`
+:download:`Curriculum Vitae <cv/resume_gurecky.pdf>`
 
 Open Source Projects
 --------------------
