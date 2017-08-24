@@ -37,7 +37,7 @@
         SOURCELINK_SUFFIX: '.txt',
         HAS_SOURCE:  true
       };
-    </script><script type="text/javascript" src="_static/underscore.js"></script><script type="text/javascript" src="_static/doctools.js"></script>
+    </script><script type="text/javascript" src="_static/underscore.js"></script><script type="text/javascript" src="_static/doctools.js"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -66,6 +66,454 @@
                 </li>
               </ul>
           </nav><div class="main-container" role="main"><div class="main wrapper body clearfix"><article><div class="timestamp postmeta">
+            <span>August 23, 2017</span>
+        </div>
+        <div class="section">
+            <div class="section" id="dgfe-spatial-discretization-of-the-1d-transport-equation">
+<h1><a href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html">DGFE Spatial Discretization of the 1D Transport Equation</a></h1>
+</div>
+<div class="section" id="background">
+<h1>Background</h1>
+<p>This work is an extension of the
+methods introduced in the computational methods in radiation transport
+graduate course offered at the University of Texas at Austin.</p>
+<p>The theory
+and consequences of applying the discrete ordinates method
+and the multigroup approximation to transport equation
+is left to the bulk of the course material. The text:
+Computational Methods of Neutron Transport by E.E. Lewis (E. 2015)
+also covers these basics in detail.</p>
+<div class="section" id="dgfe-theory">
+<h2>DGFE Theory</h2>
+<p>We begin with the within group $g$, within
+angle $n$ 1D transport equation. In the following section we do not write the
+group subscript and angle superscript in order to reduce clutter.</p>
+<div class="math">
+\[\mu \frac{\partial}{\partial x} \psi(x) + \Sigma_t \psi(x) = S(x)
+\label{1d_tr_dg}\]</div>
+<p>Equation [1d_tr_dg] is a first order, linear, ordinary differential
+equation, as such the methods introduced in chapter 6 (even parity
+transport) of E. E. Lewis’s computational methods in radiation transport
+largely do not apply. The even parity formulation of the transport
+equation contains a spatial derivative of order 2 results in certain
+nice aspects to the DGFE discretized equations – primarily that even
+order equations yield symmetric matrices after discretization. The even
+parity formulation of the transport equation is not pursued here since
+it has difficulty including anisotropic scatter (E. 2015). It is
+possible to use the Petrov-Galerkin method on the first order equation
+without constructing the second order form of the transport equation.</p>
+<p>First, we multiply both sides of equation [1d_tr_dg] by a yet to be
+defined test function, <span class="math">\(v(x)\)</span> resulting in:</p>
+<div class="math">
+\[\mu \frac{\partial}{\partial x} \psi(x) v(x) + \Sigma_t \psi(x)v(x) = S(x)v(x)
+\label{1d_tr_dg2}\]</div>
+<p>Next the equation is integrated over the domain, <span class="math">\(x \in [0, L]\)</span>:</p>
+<div class="math">
+\[\int_0^L \mu \frac{\partial \psi(x)}{\partial x} v(x) dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx
+\label{1d_tr_weak}\]</div>
+<p>This is known as the weak form of equation [1d_tr_dg].</p>
+<p>Next, we integrate the first term in [1d_tr_weak] by parts giving:</p>
+<div class="math">
+\[\mu \psi(x)v(x)|_0^L- \mu \int_0^L  \psi(x) \frac{\partial v(x)}{\partial x} dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx
+\label{1d_tr_weak2}\]</div>
+<p>We are free to choose a functional form for <span class="math">\(v(x)\)</span>. In the
+Galerkin approach, the test function is taken to be of the same
+functional form as the solution approximation <span class="math">\(\psi(x)\)</span>. The
+simple DGFE choice is to take <span class="math">\(v(x)\)</span> to be a linear combination of
+ramp functions. Each ramp function <span class="math">\(h_{ei}(x)\)</span> is supported only
+at one nodal location in the mesh and is defined to be zero at all other
+nodes. Figure [single_ele] displays two interior neighboring ramp
+functions which are each non-zero over element <span class="math">\(e_1\)</span>. The ramp
+functions are defined to have unit height over their supporting node. An
+element is defined to be the region between bounding nodes which are
+points at which the solution is supported. For simplicity all elements
+are assumed to have width <span class="math">\(\Delta x\)</span>.</p>
+<div class="figure" id="id1">
+<a class="reference internal image-reference" href="_images/single_ele.png"><img alt="Single finite element." src="_images/single_ele.png" style="width: 5.00000cm;"/></a>
+<p class="caption"><span class="caption-text">Single finite element.</span></p>
+</div>
+<div class="figure" id="id2">
+<a class="reference internal image-reference" href="_images/multi_ele.png"><img alt="Multiple DG finite elements." src="_images/multi_ele.png" style="width: 8.00000cm;"/></a>
+<p class="caption"><span class="caption-text">Multiple DG finite elements.</span></p>
+</div>
+<p>In practice the transport equation is integrated element-by-element,
+rather than over the whole domain. The contribution of each element will
+be summed together to recover the neutron balance over the whole domain.
+For now, we consider an interior element, <span class="math">\(e_1\)</span> defined on the
+sub-region: <span class="math">\([a, b]\)</span>. Figure [multi_ele] shows the interior
+element <span class="math">\(e_1\)</span> bounded by two other elements. Note that the
+hypothetical DGFE numerical solution <span class="math">\(\psi\)</span> jumps in value at
+element boundaries. As a consequence, at element boundaries the solution
+is double valued at mesh edges. This is where the Discontinuous Galerkin
+finite element scheme differs from the more commonly known Continuous
+Galerkin (CG) FE spatial discretization method.</p>
+<p>Now it is useful to formally define the ramp functions and their linear
+combination. Over a single element, the solution <span class="math">\(\psi_e(x)\)</span> is
+given by equation [sol_ele].</p>
+<div class="math">
+\[\psi_e(x) = u_{eL}h_{e1}(x) + u_{eR}h_{e2}(x) = \sum_i u_{ei} h_{ei}(x),\ x\in[a,b]
+\label{sol_ele}\]</div>
+<p>Where <span class="math">\(i\)</span> is the edge index, in the one dimension case this
+denotes either the left or right face. The ramp functions are given as:</p>
+<div class="math">
+\[ \begin{align}\begin{aligned}\begin{split}  h_{e1}(x) =
+    \begin{cases}
+                                     \frac{-1}{\Delta x}(x-a) + 1 &amp; \text{, $x\in[a,b]$} \\
+                                     0 &amp; \text{, $otherwise$}
+    \end{cases}\end{split}\\and\end{aligned}\end{align} \]</div>
+<div class="math">
+\[\begin{split}h_{e2}(x) =
+  \begin{cases}
+                                   \frac{1}{\Delta x}(x-a) &amp; \text{, $x\in[a,b]$} \\
+                                   0 &amp; \text{, $otherwise$}
+  \end{cases}\end{split}\]</div>
+<p>As previously stated, the Galerkin approach is to enforce [gal_asm].</p>
+<div class="math">
+\[\psi_e(x) = v_e(x)
+\label{gal_asm}\]</div>
+<p>on each element. At first glance this appears this is an arbitrary
+choice, and indeed, this assumption does not have to be made. One could
+use different functional families for <span class="math">\(\psi\)</span> and <span class="math">\(v\)</span>,
+however we will not investigate this option.</p>
+<p>For this case where we have chosen simple ramp functions to represent
+our 1D solution approximation, each element has two unknown scalar
+values, <span class="math">\(\{u_{eL}, u_{eR}\}\)</span> that act to scale the ramp functions
+over the element.</p>
+<div class="math">
+\[\mu \psi_e(x)v_e(x)|_a^b- \mu \int_a^b  \psi_e(x) \frac{\partial v_e(x)}{\partial x} dx + \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =  \int_a^b S_e(x)v_e(x) dx
+\label{1d_tr_weak_ele}\]</div>
+<p>Next we apply [sol_ele] and [gal_asm] to [1d_tr_weak_ele]. The
+solution over the entire domain is the summation of the piecewise linear
+solution approximation over all elements:</p>
+<div class="math">
+\[\psi(x) = \sum_{e=0}^M \psi_e(x)\]</div>
+<p>Where <span class="math">\(M\)</span> is the number of finite elements used.</p>
+<p>The integral terms in equation [1d_tr_weak_ele] can be expanded to
+explicitly show their dependence on the scaling factors. The second term
+in [1d_tr_weak_ele] integrates to [w_e].</p>
+<div class="math">
+\[\begin{split}W_e = -\int_a^b \mu \psi_e \frac{\partial v_e}{\partial x} dx = \frac{-\mu}{2}(u_{eR}^2 - u_{eL}^2) =
+\frac{-\mu}{2} \mathbf u_e
+\begin{bmatrix}
+    -1      &amp; 1 \\
+    -1       &amp; 1
+\end{bmatrix}
+\mathbf u_e^T
+\label{w_e}\end{split}\]</div>
+<p>With <span class="math">\(\mathbf u_e = [u_{eL}, u_{eR}]\)</span>. Note that this produces an
+asymmetric element matrix. As a consequence, it is required that the
+order of the nodes from left to right is preserved.</p>
+<p>The third term in [1d_tr_weak_ele] integrates to [m_e].</p>
+<div class="math">
+\[\begin{split}M_e = \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =
+\frac{\Sigma_t \Delta x}{3} (u_L^2 + u_L u_R + u_R^2) =
+\frac{\Sigma_t \Delta x}{3} \mathbf u_e
+\begin{bmatrix}
+    1      &amp; 1/2 \\
+    1/2      &amp; 1
+\end{bmatrix}
+\mathbf u_e^T
+\label{m_e}\end{split}\]</div>
+<p>The RHS of equation [1d_tr_weak_ele] integrates to [s_e].</p>
+<div class="math">
+\[\begin{split}RHS_e = \int_a^b S_e(x)v_e(x) dx =
+\frac{S_e \Delta x}{2} (u_L + u_R) =
+\frac{S_e \Delta x}{2}
+\begin{bmatrix}
+    1     \\
+    1
+\end{bmatrix}
+\mathbf u_e^T
+\label{s_e}\end{split}\]</div>
+<p>Where we take the value <span class="math">\(S_e\)</span> to be the value of <span class="math">\(S_e(x)\)</span> at
+the element mid-point. This is valid provided that <span class="math">\(S_e(x)\)</span> is a
+linear function since this is equal to the average value of
+<span class="math">\(S_e(x)\)</span> over the element.</p>
+<p>Finally, we must deal with the boundary term which arose from
+integrating the first term of equation [1d_tr_weak_ele] by parts.
+This term is the only term which will contain information from
+neighboring elements in its definition. This is why it is said that the
+DGFE technique is “compact”. Let the outward normal at a given element
+boundary to be denoted by <span class="math">\(\mathbf n\)</span>. The left side outward
+normal for element <span class="math">\(e_1\)</span> is depicted in figure [bound_norm].</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/bound_norm.png"><img alt="Outward normal on left face of element :math:`e_1`." src="_images/bound_norm.png" style="width: 8.00000cm;"/></a>
+</div>
+<p>Outward normal on left face of element <span class="math">\(e_1\)</span>. As drawn,
+<span class="math">\(\psi_{1L}^{\uparrow}=u_{e_0, 2}\)</span> and
+<span class="math">\(\psi_{1L}^{\downarrow}=u_{e_1, 1}\)</span> in the figure.</p>
+<p>It is useful to define a jump and average condition on an element
+boundary. The average condition at the junction between two elements is
+given by <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-avg">(1)</a>.</p>
+<div class="math" id="equation-avg">
+<span class="eqno">(1)</span>\[\{\{u\}\}_p = \frac{1}{2} (\lim_{x \to p^+} \psi(x) + \lim_{x \to p^-} \psi(x))\]</div>
+<p>Where the subscript <span class="math">\(p\)</span> denotes evaluation at a boundary. Since
+<span class="math">\(\psi(x)|_p\)</span> and therefore <span class="math">\(u_p\)</span> is double valued at the
+element boundaries; the limit approaching from the left is not equal to
+the limit approaching from the right.</p>
+<p>And the jump is provided by equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-jmp">(2)</a>.</p>
+<div class="math" id="equation-jmp">
+<span class="eqno">(2)</span>\[[[u]]_p =  (\lim_{x \to p^+} \psi(x) - \lim_{x \to p^-} \psi(x))\]</div>
+<p>Now it is useful define the “upwind” flux. According to [upwind], the
+sign of the dot product between the current neutron flow direction,
+<span class="math">\(\mu\)</span> and the boundary normal vector <span class="math">\(\mathbf n_{e,p}\)</span> can
+be used at each edge to determine the upwind flux value.</p>
+<div class="math">
+\[\begin{split}\psi^{\uparrow} =
+  \begin{cases}
+      \psi_k|_p &amp; \text{if $\mu \cdot \mathbf n_e|_p \leq 0$} \\
+      \psi_e|_p &amp; \text{if $\mu \cdot \mathbf n_e|_p &gt; 0$}
+  \end{cases}
+\label{upwind}\end{split}\]</div>
+<p>Where <span class="math">\(k\)</span> represents the neighboring element and <span class="math">\(e\)</span> is the
+current element.</p>
+<p>It is unclear what value to choose for the flux at the element
+boundaries. This is required to evaluate
+<span class="math">\(\mu \psi_e(x) v_e(x)|_a^b\)</span> in [1d_tr_weak_ele]. The DGFE
+method introduces the numerical flux
+<span class="math">\(\mu \cdot \mathbf n \hat{F}\)</span> to resolve this issue. The boundary
+term becomes [dg_fe_bound].</p>
+<div class="math">
+\[\mu \psi_e(x) v_e(x)|_a^b = \mu \cdot \mathbf n \hat{F}  v_e(x)|_a^b
+\label{dg_fe_bound}\]</div>
+<div class="section" id="upwind-formulation">
+<h3>Upwind Formulation</h3>
+<p>In this case, when evaluating <span class="math">\(\mu \psi_e(x) v(x)|_a^b\)</span>,
+<span class="math">\(\psi(x)\)</span> always takes the upwind value at element boundaries.</p>
+<div class="math">
+\[\mu \cdot \mathbf n \hat{F}  = \mu \cdot \mathbf n \psi^{\uparrow}\]</div>
+<p>This makes physical sense if the neutrons are constrained to flow in the
+direction <span class="math">\(\mu\)</span> by the discrete ordinates approximation. The value
+of angular dependent neutron flux at the element boundaries should
+depend only on the neutron’s behavior immediately upstream of the
+boundary. In other words, all neutron interactions downstream of the
+boundary do not have a large influence on the upstream flux. This is
+true particularly in the case of the once-collided flux. It was not
+discussed in this work, but equation [1d_tr_weak] is written for a
+single scattering source iteration (SI). For more information on source
+iteration, see E.E. Lewis’s text (E. 2015).</p>
+<p>Equation [dg_fe_bound] can now be evaluated. If
+<span class="math">\(\mu \cdot \mathbf n &gt; 0\)</span>:</p>
+<div class="math">
+\[\begin{split}B_{ep_1} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_{p_1} =
+\mu \cdot \mathbf n (u_e^2)|_p =
+(\mu \cdot \mathbf n) \mathbf u_p
+\begin{bmatrix}
+    1      &amp; 0 \\
+    0      &amp; 0
+\end{bmatrix}
+\mathbf u_p^T\end{split}\]</div>
+<p>Where <span class="math">\(\mathbf u_p = [u_e, u_k]|_p\)</span>. Again, <span class="math">\(u_k|_p\)</span> is the
+value of <span class="math">\(\psi\)</span> as the boundary from the neighboring element side
+(i.e <span class="math">\(u_k=\lim_{x \to p^k}\psi(x)\)</span>) and likewise for the current
+element side: <span class="math">\(u_e|_p=\lim_{x \to p^e}\psi(x)\)</span>.</p>
+<p>If <span class="math">\(\mu \cdot \mathbf n \leq 0\)</span>:</p>
+<div class="math">
+\[\begin{split}B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_{p_2} =
+\mu \cdot \mathbf n (u_e \cdot u_k)|_p =
+(\mu \cdot \mathbf n) \mathbf u_p
+\begin{bmatrix}
+    0      &amp; 0 \\
+    1      &amp; 0
+\end{bmatrix}
+\mathbf u_p^T\end{split}\]</div>
+<p>And the sum over both edges is given by [ele_sum].</p>
+<div class="math">
+\[B_{ep_1} + B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_a^b
+\label{ele_sum}\]</div>
+</div>
+<div class="section" id="average-flux-formulation">
+<h3>Average Flux Formulation</h3>
+<p>Alternatively, instead of simply taking the upwind flux value at each
+element boundary, one may choose to use the average flux,
+<span class="math">\(\{\{u\}\}_p\)</span> at each boundary. This results in the following:</p>
+<p>If <span class="math">\(\mu \cdot \mathbf n \leq 0\)</span>:</p>
+<div class="math">
+\[\begin{split}B_{ep_1} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_{p_1} =
+\mu \cdot \mathbf n \frac{u_e}{2} (u_e + u_k)|_p =
+(\mu \cdot \mathbf n) \mathbf u_p
+\begin{bmatrix}
+    1/2     &amp; 0 \\
+    1/2     &amp; 0
+\end{bmatrix}
+\mathbf u_p^T\end{split}\]</div>
+<p>and If <span class="math">\(\mu \cdot \mathbf n &gt; 0\)</span>:</p>
+<div class="math">
+\[\begin{split}B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_{p_2} =
+\mu \cdot \mathbf n  \frac{u_e}{2} (u_e + u_k)|_p =
+(\mu \cdot \mathbf n) \mathbf u_p
+\begin{bmatrix}
+    1/2     &amp; 0 \\
+    1/2     &amp; 0
+\end{bmatrix}
+\mathbf u_p^T\end{split}\]</div>
+<p>This formulation makes physical sense in the case that upstream and
+downstream interactions influence the value of the flux at element
+boundaries. In the purely diffusive case, where Fick’s law holds, this
+assumption is valid an therefore the average flux is a good choice. In
+the case of the hyperbolic first order equation [1d_tr_weak], the
+average boundary flux formulation might lead to unphysical results.</p>
+</div>
+<div class="section" id="system-matrix-construction-and-boundary-conditions">
+<h3>System Matrix Construction and Boundary Conditions</h3>
+<p>For each element in the mesh we can write the neutron balance as:</p>
+<div class="math">
+\[B_{ep_1} + B_{ep_2} + W_e + M_e = S_e\]</div>
+<p>Multiplying both sides by <span class="math">\([\mathbf u \mathbf I]^{-1}\)</span> we obtain:</p>
+<div class="math">
+\[[b_{ep_1} + b_{ep_2} + w_e + m_e] \mathbf u^T = s_e\]</div>
+<p>Where <span class="math">\(w_e= [\mathbf u \mathbf I]^{-1}W_e\)</span>,
+<span class="math">\(s_e=[\mathbf u \mathbf I]^{-1} S_e\)</span>, and
+<span class="math">\(m_e=[\mathbf u \mathbf I ]^{-1}M_e\)</span> and <span class="math">\(\mathbf I\)</span> is the
+identity matrix. Collapsing further:</p>
+<div class="math">
+\[[A_e] \mathbf u^T = s_e\]</div>
+<p>The goal is to find the combination of the scaling factors,
+<span class="math">\(\mathbf u=\{u_0, u_1, ...\}\)</span>, over all elements that best
+satisfies the overall weak form of the neutron balance equation
+[1d_tr_weak]. One can think of the finite element method in an
+optimization context in which some (hopefully unique) combination of the
+scalars <span class="math">\(\mathbf u =\{u_0, u_1, ...\}\)</span> reduces the residual of
+[1d_tr_weak] to some minimal value.</p>
+<p>To assemble the system matrix <span class="math">\(\mathbf A\)</span>, the individual element
+matrices are “stamped” into <span class="math">\(\mathbf A\)</span>. Since each node in the
+mesh is assigned a <em>unique ID</em> the elements of <span class="math">\(A_e\)</span> can be copied
+into the global matrix <span class="math">\(\mathbf A\)</span>.</p>
+<p>After <span class="math">\(\mathbf A\)</span> is constructed, the discretized, non-multiplying
+transport equation can be written as:</p>
+<div class="math">
+\[\mathbf A \mathbf u^T = \mathbf s\]</div>
+<p><span class="math">\(\mathbf A\)</span> is a sparse, non symmetric matrix. This linear system
+of equations can be solved by GMRES or other iterative techniques.</p>
+<p>Up until this point we have disregarded the application of boundary
+conditions since we focused on the interior elements. For the first
+order transport equation, all boundary conditions (vacuum, reflective,
+white) can be described as either fixed or free. A Fixed boundary
+condition specifies the value of <span class="math">\(\psi\)</span> at the boundary. This
+arises in the vacuum case where inward facing ordinate fluxes are set
+equal to zero at the boundary. This also arises in the reflective and
+white cases where the banked outward fluxes from the previous scattering
+source iteration are assigned as fixed boundary values for the inward
+facing ordinate fluxes. A free boundary arises in cases where the flux
+is allowed to escape from the domain. To implement a fixed boundary
+condition, the row in the global system matrix, A, corresponding to the
+boundary node is set equal to zero at all elements except at the
+diagonal where the diagonal entry is set equal to 1. On the right hand
+side the specified value for the flux at that node is set. Free boundary
+conditions require no action.</p>
+</div>
+</div>
+</div>
+<div class="section" id="results">
+<h1>Results</h1>
+<p>In all cases the group structure boundaries of:</p>
+<div class="math">
+\[[1.{E^-3} ,1.{E^-2}, 1.{E^-1}, 1.E0, 1.E1, 1.E2, 1.E3, 1.E4, 1.E5, 1.E6, 1.E7](eV)\]</div>
+<p>were used to generate a 10-group cross section library. The infinite
+dilution multigroup cross sections were generated with NJOY for this
+work (al. 2017). For plotting, the group scalar fluxes are recovered
+from the angle-dependant flux by the quadrature rule:</p>
+<div class="math">
+\[\phi_g = \frac{1}{2}\sum_{n=1}^N w_n \psi_g^n(x)\]</div>
+<p>For all presented results, <span class="math">\(S_8\)</span> Gauss-Legendre quadrature was
+used for the angular flux decomposition by the discrete ordinates
+method. Accordingly, the scattering cross section was approximated with
+the first <span class="math">\(8\)</span> Legendre moments (thus retaining the first 8 terms
+in the Legendre expansion of the scattering kernel). For consistency,
+all cases were executed with 160 scattering source iterations to
+converge the angle and energy neutron distribution.</p>
+<p>The first result shown in figure [gb_1] demonstrates the discontinuous
+nature of the solution approximation. Neutrons are introduced on the left face traveling
+to the right with an initial energy of <span class="math">\(1e7eV\)</span> and with a
+source flux of <span class="math">\(1.27E6 [n/cm^2s]\)</span> into a 50cm thick graphite
+block. The upwind formulation was used for the numerical flux. The
+graphite was pure <span class="math">\(^{12}C\)</span> with a density of 2.23<span class="math">\([g/cc]\)</span>.
+The case was executed using a relatively coarse 20 element spatial mesh
+for visual clarity of the discontinuities.</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/scflux_graphite_beam_1.png"><img alt="Group scalar fluxes for a high energy beam incident on a graphite block. The :math:`y` axis units are in :math:`n/cm^2s`. Upwind numerical flux used." src="_images/scflux_graphite_beam_1.png" style="width: 12.00000cm;"/></a>
+</div>
+<p>The same problem was re-run this time with the average numerical flux
+formulation. This resulted in figure [gb_2].</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/scflux_graphite_beam_2.png"><img alt="Group scalar fluxes for a high energy beam incident on a graphite block. The :math:`y` axis units are in :math:`n/cm^2s`. Average numerical flux used at element boundaries." src="_images/scflux_graphite_beam_2.png" style="width: 12.00000cm;"/></a>
+</div>
+<p>Interestingly, for this problem it appears the upwind strategy provides
+a more accurate result. Qualitatively, the expected far-field
+exponential decay of the highest energy group flux is more accurately
+captured by the upwind flux formulation.</p>
+<p>In the next case, a thin (0.5:math:<cite>[mm]</cite>) sheet of highly absorptive
+pure <span class="math">\(^{10}B\)</span> with a density of 5<span class="math">\([g/cc]\)</span> was inserted
+into the graphite block at 15<span class="math">\([cm]\)</span>. Shown in figures below,
+this effectively eliminated the majority of the thermal neutron current
+passing through the region resulting in a sharp dip in thermal flux near
+the sheet, followed by thermal neutron recovery further away since there
+are still neutrons down scattering into the lower energy groups over the
+whole domain. Expectedly, the boron had little influence on the higher
+energy groups. The first case was executed with 20 elements followed by
+a fine mesh run with 60 elements.</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/scflux_graphite_beam_3.png"><img alt="Coarse mesh solution." src="_images/scflux_graphite_beam_3.png" style="width: 12.00000cm;"/></a>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/scflux_graphite_beam_4.png"><img alt="Fine mesh solution." src="_images/scflux_graphite_beam_4.png" style="width: 12.00000cm;"/></a>
+</div>
+</div>
+<div class="section" id="conclusion">
+<h1>Conclusion</h1>
+<p>The DGFE method was introduced and implemented in 1D. The current
+implementation could serve as a starting point to more detailed
+investigations.</p>
+<p>It was shown that DGFE allows for a flexible definition of the numerical
+flux and that this choice has a significant impact on the resulting
+numerical approximation.</p>
+<p>Improving the order of accuracy of the finite element discretization is
+a potential avenue for future work. This would involve increasing the
+polynomial order of the ramp basis functions over each element from 1 to
+2.</p>
+<p>Others have shown that the DGFE method “locks” in the optically thick
+diffusion limit, meaning, the flux is artificially depressed in regions
+that are highly opaque and highly diffusive to neutrons. For most
+practical problems this is not a concern, however, it could be
+interesting to investigate the work performed by J. Guermond et. al
+(2014) (Guermond, Kanschat, and Ragusa 2014) on this subject. Guermond
+et. al. present a method to adaptively choose between the unwinding and
+averaging formulation in each element independently based on the local
+scattering cross section and cell width. This has been shown to
+effectively eliminate this issue with the DGFE method without
+significant additional computational overhead.</p>
+<p>The code is available online at <a class="reference external" href="https://github.com/wgurecky/spyTran">https://github.com/wgurecky/spyTran</a>.</p>
+</div>
+<div class="section" id="references">
+<h1>References</h1>
+<div id="refs" class="references"><div id="ref-mac17"><p>al., R. Macfarlane et. 2017. “The Njoy Nuclear Data Processing System.”
+<em>Los Alamos National Laboratory (LANL)</em> LA-UR-17-20093.</p>
+</div><div id="ref-Lewis"><p>E., Lewis. 2015. <em>Numerical Methods for Radiation Transport</em>. CRC Press.</p>
+</div><div id="ref-Guermond2014"><p>Guermond, Jean-Luc, Guido Kanschat, and Jean C. Ragusa. 2014.
+“Discontinuous Galerkin for the Radiative Transport Equation.” In
+<em>Recent Developments in Discontinuous Galerkin Finite Element Methods
+for Partial Differential Equations: 2012 John H Barrett Memorial
+Lectures</em>, edited by Xiaobing Feng, Ohannes Karakashian, and Yulong
+Xing, 181–93. Cham: Springer International Publishing.
+doi:<a class="reference external" href="https://doi.org/10.1007/978-3-319-01818-8_7">10.1007/978-3-319-01818-8_7</a>.</p>
+</div><div id="ref-lesaint"><p>Lesaint, P., and P. Raviart. 1974. “On a Finite Element Method for
+Solving the Neutron Transport Equation.” <em>Mathmatical Aspects of Finite
+Elements in Partial Differential Equations</em> 33.</p>
+</div><div id="ref-reed"><p>Reed, W., and T. Hill. 1973. “Triangular Mesh Methods for the Neutron
+Transport Equation.” <em>Los Alamos National Lab</em> LA-UR-73-479.</p>
+</div><div id="ref-riviere"><p>Riviere, B. 2008. “Discontinuous Galerkin Method for Solving Elliptic
+and Parabolic Equations: Theory and Implementation.” <em>SIAM Frontiers in
+Applied Mathematics</em>.</p>
+</div></div></div>
+
+        </div>
+        <div class="postmeta">
+        <div class="author">
+            <span>Posted by William Gurecky</span>
+        </div>
+        
+        
+        </div><div class="separator post_separator"></div><div class="timestamp postmeta">
             <span>July 20, 2017</span>
         </div>
         <div class="section">
@@ -88,6 +536,8 @@
     </div></article><aside class="sidebar"><section><div class="widget">
     <h1>Recent Posts</h1>
     <ul><li>
+            <a href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html">DGFE Spatial Discretization of the 1D Transport Equation</a>
+        </li><li>
             <a href="2017/07/20/hello_world.html">Around the ‘ville</a>
         </li></ul>
 </div>
