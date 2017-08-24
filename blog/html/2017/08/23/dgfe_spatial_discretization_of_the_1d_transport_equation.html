@@ -84,44 +84,29 @@ Computational Methods of Neutron Transport by E.E. Lewis (E. 2015)
 also covers these basics in detail.</p>
 <div class="section" id="dgfe-theory">
 <h2>DGFE Theory</h2>
-<p>We begin with the within group $g$, within
-angle $n$ 1D transport equation. In the following section we do not write the
+<p>We begin with the within group <span class="math">\(g\)</span>, within
+angle <span class="math">\(n\)</span> 1D transport equation. In the following section we do not write the
 group subscript and angle superscript in order to reduce clutter.</p>
-<div class="math">
-\[\mu \frac{\partial}{\partial x} \psi(x) + \Sigma_t \psi(x) = S(x)
-\label{1d_tr_dg}\]</div>
-<p>Equation [1d_tr_dg] is a first order, linear, ordinary differential
-equation, as such the methods introduced in chapter 6 (even parity
-transport) of E. E. Lewis’s computational methods in radiation transport
-largely do not apply. The even parity formulation of the transport
-equation contains a spatial derivative of order 2 results in certain
-nice aspects to the DGFE discretized equations – primarily that even
-order equations yield symmetric matrices after discretization. The even
-parity formulation of the transport equation is not pursued here since
-it has difficulty including anisotropic scatter (E. 2015). It is
-possible to use the Petrov-Galerkin method on the first order equation
-without constructing the second order form of the transport equation.</p>
-<p>First, we multiply both sides of equation [1d_tr_dg] by a yet to be
+<div class="math" id="equation-1d_tr_dg">
+<span class="eqno">(1)</span>\[\mu \frac{\partial}{\partial x} \psi(x) + \Sigma_t \psi(x) = S(x)\]</div>
+<p>First, we multiply both sides of equation <a class="reference internal" href="#equation-1d_tr_dg">(1)</a> by a yet to be
 defined test function, <span class="math">\(v(x)\)</span> resulting in:</p>
-<div class="math">
-\[\mu \frac{\partial}{\partial x} \psi(x) v(x) + \Sigma_t \psi(x)v(x) = S(x)v(x)
-\label{1d_tr_dg2}\]</div>
+<div class="math" id="equation-1d_tr_dg2">
+<span class="eqno">(2)</span>\[\mu \frac{\partial}{\partial x} \psi(x) v(x) + \Sigma_t \psi(x)v(x) = S(x)v(x)\]</div>
 <p>Next the equation is integrated over the domain, <span class="math">\(x \in [0, L]\)</span>:</p>
-<div class="math">
-\[\int_0^L \mu \frac{\partial \psi(x)}{\partial x} v(x) dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx
-\label{1d_tr_weak}\]</div>
-<p>This is known as the weak form of equation [1d_tr_dg].</p>
-<p>Next, we integrate the first term in [1d_tr_weak] by parts giving:</p>
-<div class="math">
-\[\mu \psi(x)v(x)|_0^L- \mu \int_0^L  \psi(x) \frac{\partial v(x)}{\partial x} dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx
-\label{1d_tr_weak2}\]</div>
+<div class="math" id="equation-1d_tr_weak">
+<span class="eqno">(3)</span>\[\int_0^L \mu \frac{\partial \psi(x)}{\partial x} v(x) dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx\]</div>
+<p>This is known as the weak form of equation <a class="reference internal" href="#equation-1d_tr_dg">(1)</a>.</p>
+<p>Next, we integrate the first term in <a class="reference internal" href="#equation-1d_tr_weak">(3)</a> by parts giving:</p>
+<div class="math" id="equation-1d_tr_weak2">
+<span class="eqno">(4)</span>\[\mu \psi(x)v(x)|_0^L- \mu \int_0^L  \psi(x) \frac{\partial v(x)}{\partial x} dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx\]</div>
 <p>We are free to choose a functional form for <span class="math">\(v(x)\)</span>. In the
 Galerkin approach, the test function is taken to be of the same
 functional form as the solution approximation <span class="math">\(\psi(x)\)</span>. The
 simple DGFE choice is to take <span class="math">\(v(x)\)</span> to be a linear combination of
 ramp functions. Each ramp function <span class="math">\(h_{ei}(x)\)</span> is supported only
 at one nodal location in the mesh and is defined to be zero at all other
-nodes. Figure [single_ele] displays two interior neighboring ramp
+nodes. The figure displays two interior neighboring ramp
 functions which are each non-zero over element <span class="math">\(e_1\)</span>. The ramp
 functions are defined to have unit height over their supporting node. An
 element is defined to be the region between bounding nodes which are
@@ -139,7 +124,7 @@ are assumed to have width <span class="math">\(\Delta x\)</span>.</p>
 rather than over the whole domain. The contribution of each element will
 be summed together to recover the neutron balance over the whole domain.
 For now, we consider an interior element, <span class="math">\(e_1\)</span> defined on the
-sub-region: <span class="math">\([a, b]\)</span>. Figure [multi_ele] shows the interior
+sub-region: <span class="math">\([a, b]\)</span>. The above figure shows the interior
 element <span class="math">\(e_1\)</span> bounded by two other elements. Note that the
 hypothetical DGFE numerical solution <span class="math">\(\psi\)</span> jumps in value at
 element boundaries. As a consequence, at element boundaries the solution
@@ -148,28 +133,27 @@ finite element scheme differs from the more commonly known Continuous
 Galerkin (CG) FE spatial discretization method.</p>
 <p>Now it is useful to formally define the ramp functions and their linear
 combination. Over a single element, the solution <span class="math">\(\psi_e(x)\)</span> is
-given by equation [sol_ele].</p>
-<div class="math">
-\[\psi_e(x) = u_{eL}h_{e1}(x) + u_{eR}h_{e2}(x) = \sum_i u_{ei} h_{ei}(x),\ x\in[a,b]
-\label{sol_ele}\]</div>
+given by equation <a class="reference internal" href="#equation-sol_ele">(5)</a>.</p>
+<div class="math" id="equation-sol_ele">
+<span class="eqno">(5)</span>\[\psi_e(x) = u_{eL}h_{e1}(x) + u_{eR}h_{e2}(x) = \sum_i u_{ei} h_{ei}(x),\ x\in[a,b]\]</div>
 <p>Where <span class="math">\(i\)</span> is the edge index, in the one dimension case this
 denotes either the left or right face. The ramp functions are given as:</p>
 <div class="math">
-\[ \begin{align}\begin{aligned}\begin{split}  h_{e1}(x) =
-    \begin{cases}
-                                     \frac{-1}{\Delta x}(x-a) + 1 &amp; \text{, $x\in[a,b]$} \\
-                                     0 &amp; \text{, $otherwise$}
-    \end{cases}\end{split}\\and\end{aligned}\end{align} \]</div>
+\[\begin{split}h_{e1}(x) =
+  \begin{cases}
+                                   \frac{-1}{\Delta x}(x-a) + 1 &amp; \text{, $x\in[a,b]$} \\
+                                   0 &amp; \text{, $otherwise$}
+  \end{cases}\end{split}\]</div>
+<p>and</p>
 <div class="math">
 \[\begin{split}h_{e2}(x) =
   \begin{cases}
                                    \frac{1}{\Delta x}(x-a) &amp; \text{, $x\in[a,b]$} \\
                                    0 &amp; \text{, $otherwise$}
   \end{cases}\end{split}\]</div>
-<p>As previously stated, the Galerkin approach is to enforce [gal_asm].</p>
-<div class="math">
-\[\psi_e(x) = v_e(x)
-\label{gal_asm}\]</div>
+<p>As previously stated, the Galerkin approach is to enforce <a class="reference internal" href="#equation-gal_asm">(6)</a>.</p>
+<div class="math" id="equation-gal_asm">
+<span class="eqno">(6)</span>\[\psi_e(x) = v_e(x)\]</div>
 <p>on each element. At first glance this appears this is an arbitrary
 choice, and indeed, this assumption does not have to be made. One could
 use different functional families for <span class="math">\(\psi\)</span> and <span class="math">\(v\)</span>,
@@ -178,63 +162,59 @@ however we will not investigate this option.</p>
 our 1D solution approximation, each element has two unknown scalar
 values, <span class="math">\(\{u_{eL}, u_{eR}\}\)</span> that act to scale the ramp functions
 over the element.</p>
-<div class="math">
-\[\mu \psi_e(x)v_e(x)|_a^b- \mu \int_a^b  \psi_e(x) \frac{\partial v_e(x)}{\partial x} dx + \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =  \int_a^b S_e(x)v_e(x) dx
-\label{1d_tr_weak_ele}\]</div>
-<p>Next we apply [sol_ele] and [gal_asm] to [1d_tr_weak_ele]. The
+<div class="math" id="equation-1d_tr_weak_ele">
+<span class="eqno">(7)</span>\[\mu \psi_e(x)v_e(x)|_a^b- \mu \int_a^b  \psi_e(x) \frac{\partial v_e(x)}{\partial x} dx + \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =  \int_a^b S_e(x)v_e(x) dx\]</div>
+<p>Next we apply <a class="reference internal" href="#equation-sol_ele">(5)</a> and <a class="reference internal" href="#equation-gal_asm">(6)</a> to <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a>. The
 solution over the entire domain is the summation of the piecewise linear
 solution approximation over all elements:</p>
 <div class="math">
 \[\psi(x) = \sum_{e=0}^M \psi_e(x)\]</div>
 <p>Where <span class="math">\(M\)</span> is the number of finite elements used.</p>
-<p>The integral terms in equation [1d_tr_weak_ele] can be expanded to
+<p>The integral terms in equation <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a> can be expanded to
 explicitly show their dependence on the scaling factors. The second term
-in [1d_tr_weak_ele] integrates to [w_e].</p>
-<div class="math">
-\[\begin{split}W_e = -\int_a^b \mu \psi_e \frac{\partial v_e}{\partial x} dx = \frac{-\mu}{2}(u_{eR}^2 - u_{eL}^2) =
+in <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a> integrates to <a class="reference internal" href="#equation-w_e">(8)</a>.</p>
+<div class="math" id="equation-w_e">
+<span class="eqno">(8)</span>\[\begin{split}W_e = -\int_a^b \mu \psi_e \frac{\partial v_e}{\partial x} dx = \frac{-\mu}{2}(u_{eR}^2 - u_{eL}^2) =
 \frac{-\mu}{2} \mathbf u_e
 \begin{bmatrix}
     -1      &amp; 1 \\
     -1       &amp; 1
 \end{bmatrix}
-\mathbf u_e^T
-\label{w_e}\end{split}\]</div>
+\mathbf u_e^T\end{split}\]</div>
 <p>With <span class="math">\(\mathbf u_e = [u_{eL}, u_{eR}]\)</span>. Note that this produces an
 asymmetric element matrix. As a consequence, it is required that the
 order of the nodes from left to right is preserved.</p>
-<p>The third term in [1d_tr_weak_ele] integrates to [m_e].</p>
-<div class="math">
-\[\begin{split}M_e = \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =
+<p>The third term in <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a> integrates to <a class="reference internal" href="#equation-m_e">(9)</a>.</p>
+<div class="math" id="equation-m_e">
+<span class="eqno">(9)</span>\[\begin{split}M_e = \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =
 \frac{\Sigma_t \Delta x}{3} (u_L^2 + u_L u_R + u_R^2) =
 \frac{\Sigma_t \Delta x}{3} \mathbf u_e
 \begin{bmatrix}
     1      &amp; 1/2 \\
     1/2      &amp; 1
 \end{bmatrix}
-\mathbf u_e^T
-\label{m_e}\end{split}\]</div>
-<p>The RHS of equation [1d_tr_weak_ele] integrates to [s_e].</p>
-<div class="math">
-\[\begin{split}RHS_e = \int_a^b S_e(x)v_e(x) dx =
+\mathbf u_e^T\end{split}\]</div>
+<p>The RHS of equation <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a> integrates to <a class="reference internal" href="#equation-s_e">(10)</a>.</p>
+<div class="math" id="equation-s_e">
+<span class="eqno">(10)</span>\[\begin{split}RHS_e = \int_a^b S_e(x)v_e(x) dx =
 \frac{S_e \Delta x}{2} (u_L + u_R) =
 \frac{S_e \Delta x}{2}
 \begin{bmatrix}
     1     \\
     1
 \end{bmatrix}
-\mathbf u_e^T
-\label{s_e}\end{split}\]</div>
+\mathbf u_e^T\end{split}\]</div>
 <p>Where we take the value <span class="math">\(S_e\)</span> to be the value of <span class="math">\(S_e(x)\)</span> at
 the element mid-point. This is valid provided that <span class="math">\(S_e(x)\)</span> is a
 linear function since this is equal to the average value of
 <span class="math">\(S_e(x)\)</span> over the element.</p>
 <p>Finally, we must deal with the boundary term which arose from
-integrating the first term of equation [1d_tr_weak_ele] by parts.
+integrating the first term of equation <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a> by parts.
 This term is the only term which will contain information from
 neighboring elements in its definition. This is why it is said that the
 DGFE technique is “compact”. Let the outward normal at a given element
 boundary to be denoted by <span class="math">\(\mathbf n\)</span>. The left side outward
-normal for element <span class="math">\(e_1\)</span> is depicted in figure [bound_norm].</p>
+normal for element <span class="math">\(e_1\)</span> is depicted in the figure:</p>
 <div class="figure">
 <a class="reference internal image-reference" href="../../../_images/bound_norm.png"><img alt="Outward normal on left face of element :math:`e_1`." src="../../../_images/bound_norm.png" style="width: 8.00000cm;" /></a>
 </div>
@@ -243,55 +223,43 @@ normal for element <span class="math">\(e_1\)</span> is depicted in figure [boun
 <span class="math">\(\psi_{1L}^{\downarrow}=u_{e_1, 1}\)</span> in the figure.</p>
 <p>It is useful to define a jump and average condition on an element
 boundary. The average condition at the junction between two elements is
-given by <a class="reference internal" href="#equation-avg">(1)</a>.</p>
+given by <a class="reference internal" href="#equation-avg">(11)</a>.</p>
 <div class="math" id="equation-avg">
-<span class="eqno">(1)</span>\[\{\{u\}\}_p = \frac{1}{2} (\lim_{x \to p^+} \psi(x) + \lim_{x \to p^-} \psi(x))\]</div>
+<span class="eqno">(11)</span>\[\{\{u\}\}_p = \frac{1}{2} (\lim_{x \to p^+} \psi(x) + \lim_{x \to p^-} \psi(x))\]</div>
 <p>Where the subscript <span class="math">\(p\)</span> denotes evaluation at a boundary. Since
 <span class="math">\(\psi(x)|_p\)</span> and therefore <span class="math">\(u_p\)</span> is double valued at the
 element boundaries; the limit approaching from the left is not equal to
 the limit approaching from the right.</p>
-<p>And the jump is provided by equation <a class="reference internal" href="#equation-jmp">(2)</a>.</p>
+<p>And the jump is provided by equation <a class="reference internal" href="#equation-jmp">(12)</a>.</p>
 <div class="math" id="equation-jmp">
-<span class="eqno">(2)</span>\[[[u]]_p =  (\lim_{x \to p^+} \psi(x) - \lim_{x \to p^-} \psi(x))\]</div>
-<p>Now it is useful define the “upwind” flux. According to [upwind], the
+<span class="eqno">(12)</span>\[[[u]]_p =  (\lim_{x \to p^+} \psi(x) - \lim_{x \to p^-} \psi(x))\]</div>
+<p>Now it is useful define the “upwind” flux. According to <a class="reference internal" href="#equation-upwind">(13)</a>, the
 sign of the dot product between the current neutron flow direction,
 <span class="math">\(\mu\)</span> and the boundary normal vector <span class="math">\(\mathbf n_{e,p}\)</span> can
 be used at each edge to determine the upwind flux value.</p>
-<div class="math">
-\[\begin{split}\psi^{\uparrow} =
+<div class="math" id="equation-upwind">
+<span class="eqno">(13)</span>\[\begin{split}\psi^{\uparrow} =
   \begin{cases}
       \psi_k|_p &amp; \text{if $\mu \cdot \mathbf n_e|_p \leq 0$} \\
       \psi_e|_p &amp; \text{if $\mu \cdot \mathbf n_e|_p &gt; 0$}
-  \end{cases}
-\label{upwind}\end{split}\]</div>
+  \end{cases}\end{split}\]</div>
 <p>Where <span class="math">\(k\)</span> represents the neighboring element and <span class="math">\(e\)</span> is the
 current element.</p>
 <p>It is unclear what value to choose for the flux at the element
 boundaries. This is required to evaluate
-<span class="math">\(\mu \psi_e(x) v_e(x)|_a^b\)</span> in [1d_tr_weak_ele]. The DGFE
-method introduces the numerical flux
+<span class="math">\(\mu \psi_e(x) v_e(x)|_a^b\)</span> in <a class="reference internal" href="#equation-1d_tr_weak_ele">(7)</a>.
+The numerical flux is introduced
 <span class="math">\(\mu \cdot \mathbf n \hat{F}\)</span> to resolve this issue. The boundary
-term becomes [dg_fe_bound].</p>
-<div class="math">
-\[\mu \psi_e(x) v_e(x)|_a^b = \mu \cdot \mathbf n \hat{F}  v_e(x)|_a^b
-\label{dg_fe_bound}\]</div>
+term becomes <a class="reference internal" href="#equation-dg_fe_bound">(14)</a>.</p>
+<div class="math" id="equation-dg_fe_bound">
+<span class="eqno">(14)</span>\[\mu \psi_e(x) v_e(x)|_a^b = \mu \cdot \mathbf n \hat{F}  v_e(x)|_a^b\]</div>
 <div class="section" id="upwind-formulation">
 <h3>Upwind Formulation</h3>
 <p>In this case, when evaluating <span class="math">\(\mu \psi_e(x) v(x)|_a^b\)</span>,
 <span class="math">\(\psi(x)\)</span> always takes the upwind value at element boundaries.</p>
 <div class="math">
 \[\mu \cdot \mathbf n \hat{F}  = \mu \cdot \mathbf n \psi^{\uparrow}\]</div>
-<p>This makes physical sense if the neutrons are constrained to flow in the
-direction <span class="math">\(\mu\)</span> by the discrete ordinates approximation. The value
-of angular dependent neutron flux at the element boundaries should
-depend only on the neutron’s behavior immediately upstream of the
-boundary. In other words, all neutron interactions downstream of the
-boundary do not have a large influence on the upstream flux. This is
-true particularly in the case of the once-collided flux. It was not
-discussed in this work, but equation [1d_tr_weak] is written for a
-single scattering source iteration (SI). For more information on source
-iteration, see E.E. Lewis’s text (E. 2015).</p>
-<p>Equation [dg_fe_bound] can now be evaluated. If
+<p>Equation <a class="reference internal" href="#equation-dg_fe_bound">(14)</a> can now be evaluated. If
 <span class="math">\(\mu \cdot \mathbf n &gt; 0\)</span>:</p>
 <div class="math">
 \[\begin{split}B_{ep_1} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_{p_1} =
@@ -316,10 +284,9 @@ element side: <span class="math">\(u_e|_p=\lim_{x \to p^e}\psi(x)\)</span>.</p>
     1      &amp; 0
 \end{bmatrix}
 \mathbf u_p^T\end{split}\]</div>
-<p>And the sum over both edges is given by [ele_sum].</p>
-<div class="math">
-\[B_{ep_1} + B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_a^b
-\label{ele_sum}\]</div>
+<p>And the sum over both edges is given by <a class="reference internal" href="#equation-ele_sum">(15)</a>.</p>
+<div class="math" id="equation-ele_sum">
+<span class="eqno">(15)</span>\[B_{ep_1} + B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_a^b\]</div>
 </div>
 <div class="section" id="average-flux-formulation">
 <h3>Average Flux Formulation</h3>
@@ -346,12 +313,6 @@ element boundary, one may choose to use the average flux,
     1/2     &amp; 0
 \end{bmatrix}
 \mathbf u_p^T\end{split}\]</div>
-<p>This formulation makes physical sense in the case that upstream and
-downstream interactions influence the value of the flux at element
-boundaries. In the purely diffusive case, where Fick’s law holds, this
-assumption is valid an therefore the average flux is a good choice. In
-the case of the hyperbolic first order equation [1d_tr_weak], the
-average boundary flux formulation might lead to unphysical results.</p>
 </div>
 <div class="section" id="system-matrix-construction-and-boundary-conditions">
 <h3>System Matrix Construction and Boundary Conditions</h3>
@@ -361,20 +322,18 @@ average boundary flux formulation might lead to unphysical results.</p>
 <p>Multiplying both sides by <span class="math">\([\mathbf u \mathbf I]^{-1}\)</span> we obtain:</p>
 <div class="math">
 \[[b_{ep_1} + b_{ep_2} + w_e + m_e] \mathbf u^T = s_e\]</div>
-<p>Where <span class="math">\(w_e= [\mathbf u \mathbf I]^{-1}W_e\)</span>,
+<p>Where <span class="math">\(w_e \mathbf u^T= [\mathbf u \mathbf I]^{-1}W_e\)</span>,
 <span class="math">\(s_e=[\mathbf u \mathbf I]^{-1} S_e\)</span>, and
-<span class="math">\(m_e=[\mathbf u \mathbf I ]^{-1}M_e\)</span> and <span class="math">\(\mathbf I\)</span> is the
+<span class="math">\(m_e \mathbf u^T=[\mathbf u \mathbf I ]^{-1}M_e\)</span> and <span class="math">\(\mathbf I\)</span> is the
 identity matrix. Collapsing further:</p>
 <div class="math">
 \[[A_e] \mathbf u^T = s_e\]</div>
 <p>The goal is to find the combination of the scaling factors,
 <span class="math">\(\mathbf u=\{u_0, u_1, ...\}\)</span>, over all elements that best
 satisfies the overall weak form of the neutron balance equation
-[1d_tr_weak]. One can think of the finite element method in an
-optimization context in which some (hopefully unique) combination of the
-scalars <span class="math">\(\mathbf u =\{u_0, u_1, ...\}\)</span> reduces the residual of
-[1d_tr_weak] to some minimal value.</p>
-<p>To assemble the system matrix <span class="math">\(\mathbf A\)</span>, the individual element
+<a class="reference internal" href="#equation-1d_tr_weak">(3)</a>. One can think of the finite element method in an
+optimization context.  For more information see notes on the weighted residual method.</p>
+<p>To assemble the global system matrix <span class="math">\(\mathbf A\)</span>, the individual element
 matrices are “stamped” into <span class="math">\(\mathbf A\)</span>. Since each node in the
 mesh is assigned a <em>unique ID</em> the elements of <span class="math">\(A_e\)</span> can be copied
 into the global matrix <span class="math">\(\mathbf A\)</span>.</p>
@@ -395,7 +354,7 @@ white cases where the banked outward fluxes from the previous scattering
 source iteration are assigned as fixed boundary values for the inward
 facing ordinate fluxes. A free boundary arises in cases where the flux
 is allowed to escape from the domain. To implement a fixed boundary
-condition, the row in the global system matrix, A, corresponding to the
+condition, the row in the global system matrix, <span class="math">\(\mathbf A\)</span>, corresponding to the
 boundary node is set equal to zero at all elements except at the
 diagonal where the diagonal entry is set equal to 1. On the right hand
 side the specified value for the flux at that node is set. Free boundary
@@ -421,7 +380,7 @@ the first <span class="math">\(8\)</span> Legendre moments (thus retaining the f
 in the Legendre expansion of the scattering kernel). For consistency,
 all cases were executed with 160 scattering source iterations to
 converge the angle and energy neutron distribution.</p>
-<p>The first result shown in figure [gb_1] demonstrates the discontinuous
+<p>The first result shown in figure below demonstrates the discontinuous
 nature of the solution approximation. Neutrons are introduced on the left face traveling
 to the right with an initial energy of <span class="math">\(1e7eV\)</span> and with a
 source flux of <span class="math">\(1.27E6 [n/cm^2s]\)</span> into a 50cm thick graphite
@@ -433,7 +392,7 @@ for visual clarity of the discontinuities.</p>
 <a class="reference internal image-reference" href="../../../_images/scflux_graphite_beam_1.png"><img alt="Group scalar fluxes for a high energy beam incident on a graphite block. The :math:`y` axis units are in :math:`n/cm^2s`. Upwind numerical flux used." src="../../../_images/scflux_graphite_beam_1.png" style="width: 12.00000cm;" /></a>
 </div>
 <p>The same problem was re-run this time with the average numerical flux
-formulation. This resulted in figure [gb_2].</p>
+formulation. This resulted in the following figure.</p>
 <div class="figure">
 <a class="reference internal image-reference" href="../../../_images/scflux_graphite_beam_2.png"><img alt="Group scalar fluxes for a high energy beam incident on a graphite block. The :math:`y` axis units are in :math:`n/cm^2s`. Average numerical flux used at element boundaries." src="../../../_images/scflux_graphite_beam_2.png" style="width: 12.00000cm;" /></a>
 </div>
