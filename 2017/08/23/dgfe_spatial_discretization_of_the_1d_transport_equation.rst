@@ -58,7 +58,7 @@ We are free to choose a functional form for :math:`v(x)`. In the
 Galerkin approach, the test function is taken to be of the same
 functional form as the solution approximation :math:`\psi(x)`. The
 simple DGFE choice is to take :math:`v(x)` to be a linear combination of
-ramp functions. Each ramp function :math:`h_{ei}(x)` is supported only
+ramp functions. Each ramp function, :math:`h_{ei}(x)`, is supported only
 at one nodal location in the mesh and is defined to be zero at all other
 nodes. The figure displays two interior neighboring ramp
 functions which are each non-zero over element :math:`e_1`. The ramp
@@ -87,7 +87,7 @@ sub-region: :math:`[a, b]`. The above figure shows the interior
 element :math:`e_1` bounded by two other elements. Note that the
 hypothetical DGFE numerical solution :math:`\psi` jumps in value at
 element boundaries. As a consequence, at element boundaries the solution
-is double valued at mesh edges. This is where the Discontinuous Galerkin
+is double valued. This is where the Discontinuous Galerkin
 finite element scheme differs from the more commonly known Continuous
 Galerkin (CG) FE spatial discretization method.
 
@@ -434,7 +434,7 @@ a more accurate result. Qualitatively, the expected far-field
 exponential decay of the highest energy group flux is more accurately
 captured by the upwind flux formulation.
 
-In the next case, a thin (0.5:math:`[mm]`) sheet of highly absorptive
+In the next case, a thin (0.5 :math:`[mm]`) sheet of highly absorptive
 pure :math:`^{10}B` with a density of 5\ :math:`[g/cc]` was inserted
 into the graphite block at 15\ :math:`[cm]`. Shown in figures below,
 this effectively eliminated the majority of the thermal neutron current

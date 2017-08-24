@@ -105,7 +105,7 @@ defined test function, <span class="math">\(v(x)\)</span> resulting in:</p>
 Galerkin approach, the test function is taken to be of the same
 functional form as the solution approximation <span class="math">\(\psi(x)\)</span>. The
 simple DGFE choice is to take <span class="math">\(v(x)\)</span> to be a linear combination of
-ramp functions. Each ramp function <span class="math">\(h_{ei}(x)\)</span> is supported only
+ramp functions. Each ramp function, <span class="math">\(h_{ei}(x)\)</span>, is supported only
 at one nodal location in the mesh and is defined to be zero at all other
 nodes. The figure displays two interior neighboring ramp
 functions which are each non-zero over element <span class="math">\(e_1\)</span>. The ramp
@@ -129,7 +129,7 @@ sub-region: <span class="math">\([a, b]\)</span>. The above figure shows the int
 element <span class="math">\(e_1\)</span> bounded by two other elements. Note that the
 hypothetical DGFE numerical solution <span class="math">\(\psi\)</span> jumps in value at
 element boundaries. As a consequence, at element boundaries the solution
-is double valued at mesh edges. This is where the Discontinuous Galerkin
+is double valued. This is where the Discontinuous Galerkin
 finite element scheme differs from the more commonly known Continuous
 Galerkin (CG) FE spatial discretization method.</p>
 <p>Now it is useful to formally define the ramp functions and their linear
@@ -401,7 +401,7 @@ formulation. This resulted in the following figure.</p>
 a more accurate result. Qualitatively, the expected far-field
 exponential decay of the highest energy group flux is more accurately
 captured by the upwind flux formulation.</p>
-<p>In the next case, a thin (0.5:math:<cite>[mm]</cite>) sheet of highly absorptive
+<p>In the next case, a thin (0.5 <span class="math">\([mm]\)</span>) sheet of highly absorptive
 pure <span class="math">\(^{10}B\)</span> with a density of 5<span class="math">\([g/cc]\)</span> was inserted
 into the graphite block at 15<span class="math">\([cm]\)</span>. Shown in figures below,
 this effectively eliminated the majority of the thermal neutron current

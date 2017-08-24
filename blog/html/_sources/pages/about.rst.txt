@@ -12,7 +12,10 @@ Open Source Projects
 
 `VimSum`_ : A Vim plugin for those wishing to do basic arithmetic on columns of numbers in visual mode.
 
+`pCRTree`_ : Gradient boosted regression and classification trees written in python.
+
 .. _pyReactor: https://github.com/wgurecky/pyReactor
 .. _StarVine: https://github.com/wgurecky/StarVine
 .. _VimSum: https://github.com/wgurecky/vimSum
+.. _pCRTree: https://github.com/wgurecky/pCRTree
 
