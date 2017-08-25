@@ -13,9 +13,9 @@
             <title><![CDATA[DGFE Spatial Discretization of the 1D Transport Equation]]></title>
             <description><![CDATA[<div class="section" id="dgfe-spatial-discretization-of-the-1d-transport-equation">
 <h1>DGFE Spatial Discretization of the 1D Transport Equation</h1>
-</div>
-<div class="section" id="background">
-<h1>Background</h1>
+<p>My inaugural blog entry could be considered a cookbook example of the DGFE method and
+does not serve as true theory guide.  However, if you are interested in a
+straightforwardish application of discontinuous Galerkin finite elements (DGFE) read on!</p>
 <p>This work is an extension of the
 methods introduced in the computational methods in radiation transport
 graduate course offered at the University of Texas at Austin.</p>
@@ -25,10 +25,10 @@ and the multigroup approximation to transport equation
 is left to the bulk of the course material. The text:
 Computational Methods of Neutron Transport by E.E. Lewis (E. 2015)
 also covers these basics in detail.</p>
-<div class="section" id="dgfe-theory">
-<h2>DGFE Theory</h2>
+<div class="section" id="dgfe-discretization">
+<h2>DGFE Discretization</h2>
 <p>We begin with the within group <span class="math">\(g\)</span>, within
-angle <span class="math">\(n\)</span> 1D transport equation. In the following section we do not write the
+angle <span class="math">\(n\)</span>, 1D, non-multiplying transport equation. In the following section we do not write the
 group subscript and angle superscript in order to reduce clutter.</p>
 <div class="math" id="equation-1d_tr_dg">
 <span class="eqno">(1)</span>\[\mu \frac{\partial}{\partial x} \psi(x) + \Sigma_t \psi(x) = S(x)\]</div>
@@ -39,7 +39,7 @@ defined test function, <span class="math">\(v(x)\)</span> resulting in:</p>
 <p>Next the equation is integrated over the domain, <span class="math">\(x \in [0, L]\)</span>:</p>
 <div class="math" id="equation-1d_tr_weak">
 <span class="eqno">(3)</span>\[\int_0^L \mu \frac{\partial \psi(x)}{\partial x} v(x) dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx\]</div>
-<p>This is known as the weak form of equation <a class="reference internal" href="http://127.0.0.1/blog/html/2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_dg">(1)</a>.</p>
+<p>This is known as the <a class="reference external" href="https://wikipedia.com/weak_form">weak form</a> of equation <a class="reference internal" href="http://127.0.0.1/blog/html/2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_dg">(1)</a>.</p>
 <p>Next, we integrate the first term in <a class="reference internal" href="http://127.0.0.1/blog/html/2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak">(3)</a> by parts giving:</p>
 <div class="math" id="equation-1d_tr_weak2">
 <span class="eqno">(4)</span>\[\mu \psi(x)v(x)|_0^L- \mu \int_0^L  \psi(x) \frac{\partial v(x)}{\partial x} dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx\]</div>
@@ -79,8 +79,8 @@ combination. Over a single element, the solution <span class="math">\(\psi_e(x)\
 given by equation <a class="reference internal" href="http://127.0.0.1/blog/html/2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-sol_ele">(5)</a>.</p>
 <div class="math" id="equation-sol_ele">
 <span class="eqno">(5)</span>\[\psi_e(x) = u_{eL}h_{e1}(x) + u_{eR}h_{e2}(x) = \sum_i u_{ei} h_{ei}(x),\ x\in[a,b]\]</div>
-<p>Where <span class="math">\(i\)</span> is the edge index, in the one dimension case this
-denotes either the left or right face. The ramp functions are given as:</p>
+<p>Where <span class="math">\(i\)</span> is the edge index and <span class="math">\(e\)</span> is the element index.
+The ramp functions are given as:</p>
 <div class="math">
 \[\begin{split}h_{e1}(x) =
   \begin{cases}
@@ -97,13 +97,12 @@ denotes either the left or right face. The ramp functions are given as:</p>
 <p>As previously stated, the Galerkin approach is to enforce <a class="reference internal" href="http://127.0.0.1/blog/html/2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-gal_asm">(6)</a>.</p>
 <div class="math" id="equation-gal_asm">
 <span class="eqno">(6)</span>\[\psi_e(x) = v_e(x)\]</div>
-<p>on each element. At first glance this appears this is an arbitrary
+<p>on each element. At first glance this appears to be an arbitrary
 choice, and indeed, this assumption does not have to be made. One could
 use different functional families for <span class="math">\(\psi\)</span> and <span class="math">\(v\)</span>,
-however we will not investigate this option.</p>
-<p>For this case where we have chosen simple ramp functions to represent
-our 1D solution approximation, each element has two unknown scalar
-values, <span class="math">\(\{u_{eL}, u_{eR}\}\)</span> that act to scale the ramp functions
+however we will not investigate this option here.</p>
+<p>In this case each element has two unknown supporting
+values, <span class="math">\(\{u_{eL}, u_{eR}\}\)</span>, that act to scale the ramp functions
 over the element.</p>
 <div class="math" id="equation-1d_tr_weak_ele">
 <span class="eqno">(7)</span>\[\mu \psi_e(x)v_e(x)|_a^b- \mu \int_a^b  \psi_e(x) \frac{\partial v_e(x)}{\partial x} dx + \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =  \int_a^b S_e(x)v_e(x) dx\]</div>
@@ -214,8 +213,8 @@ term becomes <a class="reference internal" href="http://127.0.0.1/blog/html/2017
 \end{bmatrix}
 \mathbf u_p^T\end{split}\]</div>
 <p>Where <span class="math">\(\mathbf u_p = [u_e, u_k]|_p\)</span>. Again, <span class="math">\(u_k|_p\)</span> is the
-value of <span class="math">\(\psi\)</span> as the boundary from the neighboring element side
-(i.e <span class="math">\(u_k=\lim_{x \to p^k}\psi(x)\)</span>) and likewise for the current
+value of <span class="math">\(\psi\)</span> approaching the edge from the neighboring element side
+(i.e <span class="math">\(u_k|_p=\lim_{x \to p^k}\psi(x)\)</span>) and likewise for the current
 element side: <span class="math">\(u_e|_p=\lim_{x \to p^e}\psi(x)\)</span>.</p>
 <p>If <span class="math">\(\mu \cdot \mathbf n \leq 0\)</span>:</p>
 <div class="math">
@@ -310,15 +309,15 @@ conditions require no action.</p>
 <p>In all cases the group structure boundaries of:</p>
 <div class="math">
 \[[1.{E^-3} ,1.{E^-2}, 1.{E^-1}, 1.E0, 1.E1, 1.E2, 1.E3, 1.E4, 1.E5, 1.E6, 1.E7](eV)\]</div>
-<p>were used to generate a 10-group cross section library. The infinite
+<p>were used to generate a 10-group cross section library. Infinite
 dilution multigroup cross sections were generated with NJOY for this
 work (al. 2017). For plotting, the group scalar fluxes are recovered
 from the angle-dependant flux by the quadrature rule:</p>
 <div class="math">
 \[\phi_g = \frac{1}{2}\sum_{n=1}^N w_n \psi_g^n(x)\]</div>
-<p>For all presented results, <span class="math">\(S_8\)</span> Gauss-Legendre quadrature was
-used for the angular flux decomposition by the discrete ordinates
-method. Accordingly, the scattering cross section was approximated with
+<p>For all presented results, <span class="math">\(S_8\)</span> Level-Symmetric quadrature was
+used to approximate integrals of the angular-dependant flux over all solid angles.
+Accordingly, the scattering cross section was approximated with
 the first <span class="math">\(8\)</span> Legendre moments (thus retaining the first 8 terms
 in the Legendre expansion of the scattering kernel). For consistency,
 all cases were executed with 160 scattering source iterations to
@@ -381,7 +380,7 @@ interesting to investigate the work performed by J. Guermond et. al
 et. al. present a method to adaptively choose between the unwinding and
 averaging formulation in each element independently based on the local
 scattering cross section and cell width. This has been shown to
-effectively eliminate this issue with the DGFE method without
+effectively eliminate this issue with the DGFE method without adding
 significant additional computational overhead.</p>
 <p>The code is available online at <a class="reference external" href="https://github.com/wgurecky/spyTran">https://github.com/wgurecky/spyTran</a>.</p>
 </div>

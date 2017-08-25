@@ -6,10 +6,9 @@ DGFE Spatial Discretization of the 1D Transport Equation
 .. tags:: none
 .. comments::
 
-
-
-Background
-===========
+My inaugural blog entry could be considered a cookbook example of the DGFE method and
+does not serve as true theory guide.  However, if you are interested in a
+straightforwardish application of discontinuous Galerkin finite elements (DGFE) read on!
 
 This work is an extension of the
 methods introduced in the computational methods in radiation transport
@@ -22,11 +21,11 @@ is left to the bulk of the course material. The text:
 Computational Methods of Neutron Transport by E.E. Lewis (E. 2015)
 also covers these basics in detail.
 
-DGFE Theory
------------
+DGFE Discretization
+-------------------
 
 We begin with the within group :math:`g`, within
-angle :math:`n` 1D transport equation. In the following section we do not write the
+angle :math:`n`, 1D, non-multiplying transport equation. In the following section we do not write the
 group subscript and angle superscript in order to reduce clutter.
 
 .. math::
@@ -46,7 +45,9 @@ Next the equation is integrated over the domain, :math:`x \in [0, L]`:
    \int_0^L \mu \frac{\partial \psi(x)}{\partial x} v(x) dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx
    :label: 1d_tr_weak
 
-This is known as the weak form of equation :eq:`1d_tr_dg`.
+This is known as the `weak form`_ of equation :eq:`1d_tr_dg`.
+
+.. _weak form: https://wikipedia.com/weak_form
 
 Next, we integrate the first term in :eq:`1d_tr_weak` by parts giving:
 
@@ -99,8 +100,8 @@ given by equation :eq:`sol_ele`.
    \psi_e(x) = u_{eL}h_{e1}(x) + u_{eR}h_{e2}(x) = \sum_i u_{ei} h_{ei}(x),\ x\in[a,b]
    :label: sol_ele
 
-Where :math:`i` is the edge index, in the one dimension case this
-denotes either the left or right face. The ramp functions are given as:
+Where :math:`i` is the edge index and :math:`e` is the element index.
+The ramp functions are given as:
 
 .. math::
    h_{e1}(x) =
@@ -124,14 +125,13 @@ As previously stated, the Galerkin approach is to enforce :eq:`gal_asm`.
    \psi_e(x) = v_e(x)
    :label: gal_asm
 
-on each element. At first glance this appears this is an arbitrary
+on each element. At first glance this appears to be an arbitrary
 choice, and indeed, this assumption does not have to be made. One could
 use different functional families for :math:`\psi` and :math:`v`,
-however we will not investigate this option.
+however we will not investigate this option here.
 
-For this case where we have chosen simple ramp functions to represent
-our 1D solution approximation, each element has two unknown scalar
-values, :math:`\{u_{eL}, u_{eR}\}` that act to scale the ramp functions
+In this case each element has two unknown supporting
+values, :math:`\{u_{eL}, u_{eR}\}`, that act to scale the ramp functions
 over the element.
 
 .. math::
@@ -279,8 +279,8 @@ Equation :eq:`dg_fe_bound` can now be evaluated. If
    \mathbf u_p^T
 
 Where :math:`\mathbf u_p = [u_e, u_k]|_p`. Again, :math:`u_k|_p` is the
-value of :math:`\psi` as the boundary from the neighboring element side
-(i.e :math:`u_k=\lim_{x \to p^k}\psi(x)`) and likewise for the current
+value of :math:`\psi` approaching the edge from the neighboring element side
+(i.e :math:`u_k|_p=\lim_{x \to p^k}\psi(x)`) and likewise for the current
 element side: :math:`u_e|_p=\lim_{x \to p^e}\psi(x)`.
 
 If :math:`\mu \cdot \mathbf n \leq 0`:
@@ -394,16 +394,16 @@ In all cases the group structure boundaries of:
 
 .. math:: [1.{E^-3} ,1.{E^-2}, 1.{E^-1}, 1.E0, 1.E1, 1.E2, 1.E3, 1.E4, 1.E5, 1.E6, 1.E7](eV)
 
-were used to generate a 10-group cross section library. The infinite
+were used to generate a 10-group cross section library. Infinite
 dilution multigroup cross sections were generated with NJOY for this
 work (al. 2017). For plotting, the group scalar fluxes are recovered
 from the angle-dependant flux by the quadrature rule:
 
 .. math:: \phi_g = \frac{1}{2}\sum_{n=1}^N w_n \psi_g^n(x)
 
-For all presented results, :math:`S_8` Gauss-Legendre quadrature was
-used for the angular flux decomposition by the discrete ordinates
-method. Accordingly, the scattering cross section was approximated with
+For all presented results, :math:`S_8` Level-Symmetric quadrature was
+used to approximate integrals of the angular-dependant flux over all solid angles.
+Accordingly, the scattering cross section was approximated with
 the first :math:`8` Legendre moments (thus retaining the first 8 terms
 in the Legendre expansion of the scattering kernel). For consistency,
 all cases were executed with 160 scattering source iterations to
@@ -478,7 +478,7 @@ interesting to investigate the work performed by J. Guermond et. al
 et. al. present a method to adaptively choose between the unwinding and
 averaging formulation in each element independently based on the local
 scattering cross section and cell width. This has been shown to
-effectively eliminate this issue with the DGFE method without
+effectively eliminate this issue with the DGFE method without adding
 significant additional computational overhead.
 
 The code is available online at https://github.com/wgurecky/spyTran.
