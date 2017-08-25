@@ -97,12 +97,12 @@ defined test function, <span class="math">\(v(x)\)</span> resulting in:</p>
 <p>Next the equation is integrated over the domain, <span class="math">\(x \in [0, L]\)</span>:</p>
 <div class="math" id="equation-1d_tr_weak">
 <span class="eqno">(3)</span>\[\int_0^L \mu \frac{\partial \psi(x)}{\partial x} v(x) dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx\]</div>
-<p>This is known as the <a class="reference external" href="https://wikipedia.com/weak_form">weak form</a> of equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_dg">(1)</a>.</p>
+<p>This is known as the <a class="reference external" href="https://wikipedia.org/wiki/Weak_formulation">weak form</a> of equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_dg">(1)</a>.</p>
 <p>Next, we integrate the first term in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak">(3)</a> by parts giving:</p>
 <div class="math" id="equation-1d_tr_weak2">
 <span class="eqno">(4)</span>\[\mu \psi(x)v(x)|_0^L- \mu \int_0^L  \psi(x) \frac{\partial v(x)}{\partial x} dx + \int_0^L \Sigma_t \psi(x)v(x) dx =  \int_0^L S(x)v(x) dx\]</div>
 <p>We are free to choose a functional form for <span class="math">\(v(x)\)</span>. In the
-Galerkin approach, the test function is taken to be of the same
+<a class="reference external" href="https://wikiversity.org/wiki/Nonlinear_finite_elements/Bubnov_Galerkin_method">Bubnov-Galerkin</a> approach, the test function is taken to be of the same
 functional form as the solution approximation <span class="math">\(\psi(x)\)</span>. The
 simple DGFE choice is to take <span class="math">\(v(x)\)</span> to be a linear combination of
 ramp functions. Each ramp function, <span class="math">\(h_{ei}(x)\)</span>, is supported only
@@ -114,11 +114,11 @@ element is defined to be the region between bounding nodes which are
 points at which the solution is supported. For simplicity all elements
 are assumed to have width <span class="math">\(\Delta x\)</span>.</p>
 <div class="figure" id="id1">
-<a class="reference internal image-reference" href="_images/single_ele.png"><img alt="Single finite element." src="_images/single_ele.png" style="width: 5.00000cm;"/></a>
+<a class="reference internal image-reference" href="_images/single_ele.png"><img alt="Single finite element." src="_images/single_ele.png" style="width: 6.00000cm;"/></a>
 <p class="caption"><span class="caption-text">Single finite element.</span></p>
 </div>
 <div class="figure" id="id2">
-<a class="reference internal image-reference" href="_images/multi_ele.png"><img alt="Multiple DG finite elements." src="_images/multi_ele.png" style="width: 8.00000cm;"/></a>
+<a class="reference internal image-reference" href="_images/multi_ele.png"><img alt="Multiple DG finite elements." src="_images/multi_ele.png" style="width: 12.00000cm;"/></a>
 <p class="caption"><span class="caption-text">Multiple DG finite elements.</span></p>
 </div>
 <p>In practice the transport equation is integrated element-by-element,
@@ -152,29 +152,46 @@ The ramp functions are given as:</p>
                                    \frac{1}{\Delta x}(x-a) &amp; \text{, $x\in[a,b]$} \\
                                    0 &amp; \text{, $otherwise$}
   \end{cases}\end{split}\]</div>
-<p>As previously stated, the Galerkin approach is to enforce <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-gal_asm">(6)</a>.</p>
+<p>To justify the next statements, we need to define the (local element) residual by <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-loc_resid">(6)</a>.
+Since the solution is approximated over element by equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-sol_ele">(5)</a>, we have no reason to
+believe the residual will actually be equal to 0 over each element (as would be the case if the original equation
+was satisfied exactly, everywhere in the domain.)</p>
+<div class="math" id="equation-loc_resid">
+<span class="eqno">(6)</span>\[R_e(x) = \mu \frac{\partial}{\partial x} \psi_e(x) + \Sigma_t \psi_e(x) - S_e(x)\]</div>
+<p>So that we may write the weak from:</p>
+<div class="math" id="equation-alt_weak">
+<span class="eqno">(7)</span>\[\int_a^b R_e(x) v_e(x) dx = 0\]</div>
+<p>In an approximate setting we would like the left hand side to be as close to zero as possible - we will have
+to choose the trial functions and the weights of the solution approximation, <span class="math">\(u_{ei}\)</span>,
+to satisfy this condition.  Of course the trivial solution of <span class="math">\(v_e(x)=0\)</span> everywhere is of no use.
+In reality, the choice of <span class="math">\(v_e(x)\)</span> is driven by physical arguments (do we need upwinding?, do we need
+more accuracy? ect.) but can seem quite arbitrary.</p>
+<p>As previously stated, the <a class="reference external" href="https://wikiversity.org/wiki/Nonlinear_finite_elements/Bubnov_Galerkin_method">Bubnov-Galerkin</a> approach is to enforce <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-gal_asm">(8)</a>.</p>
 <div class="math" id="equation-gal_asm">
-<span class="eqno">(6)</span>\[\psi_e(x) = v_e(x)\]</div>
+<span class="eqno">(8)</span>\[v_e(x) = \nu_{eL}h_{e1}(x) + \nu_{eR}h_{e2}(x) = \sum_i \nu_{ei} h_{ei}(x)\]</div>
+<p>In this example we take the weights of the test function, <span class="math">\(\nu_{ei}\)</span>, to be:</p>
+<div class="math">
+\[\nu_{eL} = u_{eL},\ \nu_{eR}=u_{eR}\]</div>
 <p>on each element. At first glance this appears to be an arbitrary
 choice, and indeed, this assumption does not have to be made. One could
 use different functional families for <span class="math">\(\psi\)</span> and <span class="math">\(v\)</span>,
-however we will not investigate this option here.</p>
+however we will not investigate this option here (see the <a class="reference external" href="https://wikipedia.org/wiki/Petrov-Galerkin_method">Petrov-Galerkin</a> method).</p>
 <p>In this case each element has two unknown supporting
 values, <span class="math">\(\{u_{eL}, u_{eR}\}\)</span>, that act to scale the ramp functions
 over the element.</p>
 <div class="math" id="equation-1d_tr_weak_ele">
-<span class="eqno">(7)</span>\[\mu \psi_e(x)v_e(x)|_a^b- \mu \int_a^b  \psi_e(x) \frac{\partial v_e(x)}{\partial x} dx + \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =  \int_a^b S_e(x)v_e(x) dx\]</div>
-<p>Next we apply <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-sol_ele">(5)</a> and <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-gal_asm">(6)</a> to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a>. The
+<span class="eqno">(9)</span>\[\mu \psi_e(x)v_e(x)|_a^b- \mu \int_a^b  \psi_e(x) \frac{\partial v_e(x)}{\partial x} dx + \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =  \int_a^b S_e(x)v_e(x) dx\]</div>
+<p>Next we apply <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-sol_ele">(5)</a> and <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-gal_asm">(8)</a> to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a>. The
 solution over the entire domain is the summation of the piecewise linear
 solution approximation over all elements:</p>
 <div class="math">
 \[\psi(x) = \sum_{e=0}^M \psi_e(x)\]</div>
 <p>Where <span class="math">\(M\)</span> is the number of finite elements used.</p>
-<p>The integral terms in equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a> can be expanded to
+<p>The integral terms in equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a> can be expanded to
 explicitly show their dependence on the scaling factors. The second term
-in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a> integrates to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-w_e">(8)</a>.</p>
+in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a> integrates to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-w_e">(10)</a>.</p>
 <div class="math" id="equation-w_e">
-<span class="eqno">(8)</span>\[\begin{split}W_e = -\int_a^b \mu \psi_e \frac{\partial v_e}{\partial x} dx = \frac{-\mu}{2}(u_{eR}^2 - u_{eL}^2) =
+<span class="eqno">(10)</span>\[\begin{split}W_e = -\int_a^b \mu \psi_e \frac{\partial v_e}{\partial x} dx = \frac{-\mu}{2}(u_{eR}^2 - u_{eL}^2) =
 \frac{-\mu}{2} \mathbf u_e
 \begin{bmatrix}
     -1      &amp; 1 \\
@@ -182,11 +199,10 @@ in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of
 \end{bmatrix}
 \mathbf u_e^T\end{split}\]</div>
 <p>With <span class="math">\(\mathbf u_e = [u_{eL}, u_{eR}]\)</span>. Note that this produces an
-asymmetric element matrix. As a consequence, it is required that the
-order of the nodes from left to right is preserved.</p>
-<p>The third term in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a> integrates to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-m_e">(9)</a>.</p>
+asymmetric element matrix.</p>
+<p>The third term in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a> integrates to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-m_e">(11)</a>.</p>
 <div class="math" id="equation-m_e">
-<span class="eqno">(9)</span>\[\begin{split}M_e = \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =
+<span class="eqno">(11)</span>\[\begin{split}M_e = \int_a^b \Sigma_t \psi_e(x)v_e(x) dx =
 \frac{\Sigma_t \Delta x}{3} (u_L^2 + u_L u_R + u_R^2) =
 \frac{\Sigma_t \Delta x}{3} \mathbf u_e
 \begin{bmatrix}
@@ -194,9 +210,9 @@ order of the nodes from left to right is preserved.</p>
     1/2      &amp; 1
 \end{bmatrix}
 \mathbf u_e^T\end{split}\]</div>
-<p>The RHS of equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a> integrates to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-s_e">(10)</a>.</p>
+<p>The RHS of equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a> integrates to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-s_e">(12)</a>.</p>
 <div class="math" id="equation-s_e">
-<span class="eqno">(10)</span>\[\begin{split}RHS_e = \int_a^b S_e(x)v_e(x) dx =
+<span class="eqno">(12)</span>\[\begin{split}RHS_e = \int_a^b S_e(x)v_e(x) dx =
 \frac{S_e \Delta x}{2} (u_L + u_R) =
 \frac{S_e \Delta x}{2}
 \begin{bmatrix}
@@ -209,7 +225,7 @@ the element mid-point. This is valid provided that <span class="math">\(S_e(x)\)
 linear function since this is equal to the average value of
 <span class="math">\(S_e(x)\)</span> over the element.</p>
 <p>Finally, we must deal with the boundary term which arose from
-integrating the first term of equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a> by parts.
+integrating the first term of equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a> by parts.
 This term is the only term which will contain information from
 neighboring elements in its definition. This is why it is said that the
 DGFE technique is “compact”. Let the outward normal at a given element
@@ -219,26 +235,26 @@ normal for element <span class="math">\(e_1\)</span> is depicted in the figure:<
 <a class="reference internal image-reference" href="_images/bound_norm.png"><img alt="Outward normal on left face of element :math:`e_1`." src="_images/bound_norm.png" style="width: 8.00000cm;"/></a>
 </div>
 <p>Outward normal on left face of element <span class="math">\(e_1\)</span>. As drawn,
-<span class="math">\(\psi_{1L}^{\uparrow}=u_{e_0, 2}\)</span> and
-<span class="math">\(\psi_{1L}^{\downarrow}=u_{e_1, 1}\)</span> in the figure.</p>
+<span class="math">\(\psi_{1L}^{\uparrow}=u_{e_{0, R}}\)</span> and
+<span class="math">\(\psi_{1L}^{\downarrow}=u_{e_{1, L}}\)</span> in the figure.</p>
 <p>It is useful to define a jump and average condition on an element
 boundary. The average condition at the junction between two elements is
-given by <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-avg">(11)</a>.</p>
+given by <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-avg">(13)</a>.</p>
 <div class="math" id="equation-avg">
-<span class="eqno">(11)</span>\[\{\{u\}\}_p = \frac{1}{2} (\lim_{x \to p^+} \psi(x) + \lim_{x \to p^-} \psi(x))\]</div>
+<span class="eqno">(13)</span>\[\{\{u\}\}_p = \frac{1}{2} (\lim_{x \to p^+} \psi(x) + \lim_{x \to p^-} \psi(x))\]</div>
 <p>Where the subscript <span class="math">\(p\)</span> denotes evaluation at a boundary. Since
-<span class="math">\(\psi(x)|_p\)</span> and therefore <span class="math">\(u_p\)</span> is double valued at the
+<span class="math">\(\psi(x)|_p\)</span> is double valued at the
 element boundaries; the limit approaching from the left is not equal to
 the limit approaching from the right.</p>
-<p>And the jump is provided by equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-jmp">(12)</a>.</p>
+<p>And the jump is provided by equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-jmp">(14)</a>.</p>
 <div class="math" id="equation-jmp">
-<span class="eqno">(12)</span>\[[[u]]_p =  (\lim_{x \to p^+} \psi(x) - \lim_{x \to p^-} \psi(x))\]</div>
-<p>Now it is useful define the “upwind” flux. According to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-upwind">(13)</a>, the
+<span class="eqno">(14)</span>\[[[u]]_p =  (\lim_{x \to p^+} \psi(x) - \lim_{x \to p^-} \psi(x))\]</div>
+<p>Now we define the “upwind” flux. According to <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-upwind">(15)</a>, the
 sign of the dot product between the current neutron flow direction,
-<span class="math">\(\mu\)</span> and the boundary normal vector <span class="math">\(\mathbf n_{e,p}\)</span> can
+<span class="math">\(\mu\)</span> and the boundary normal vector <span class="math">\(\mathbf n_e|p\)</span> can
 be used at each edge to determine the upwind flux value.</p>
 <div class="math" id="equation-upwind">
-<span class="eqno">(13)</span>\[\begin{split}\psi^{\uparrow} =
+<span class="eqno">(15)</span>\[\begin{split}\psi^{\uparrow} =
   \begin{cases}
       \psi_k|_p &amp; \text{if $\mu \cdot \mathbf n_e|_p \leq 0$} \\
       \psi_e|_p &amp; \text{if $\mu \cdot \mathbf n_e|_p &gt; 0$}
@@ -247,19 +263,19 @@ be used at each edge to determine the upwind flux value.</p>
 current element.</p>
 <p>It is unclear what value to choose for the flux at the element
 boundaries. This is required to evaluate
-<span class="math">\(\mu \psi_e(x) v_e(x)|_a^b\)</span> in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(7)</a>.
-The numerical flux is introduced
-<span class="math">\(\mu \cdot \mathbf n \hat{F}\)</span> to resolve this issue. The boundary
-term becomes <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-dg_fe_bound">(14)</a>.</p>
+<span class="math">\(\mu \psi_e(x) v_e(x)|_a^b\)</span> in <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak_ele">(9)</a>.
+The numerical flux, <span class="math">\(\mu \cdot \mathbf n \hat{F}\)</span>, is introduced
+to address this issue. The boundary
+term becomes <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-dg_fe_bound">(16)</a>.</p>
 <div class="math" id="equation-dg_fe_bound">
-<span class="eqno">(14)</span>\[\mu \psi_e(x) v_e(x)|_a^b = \mu \cdot \mathbf n \hat{F}  v_e(x)|_a^b\]</div>
+<span class="eqno">(16)</span>\[\mu \psi_e(x) v_e(x)|_a^b = \mu \cdot \mathbf n \hat{F}  v_e(x)|_a^b\]</div>
 <div class="section" id="upwind-formulation">
 <h3>Upwind Formulation</h3>
 <p>In this case, when evaluating <span class="math">\(\mu \psi_e(x) v(x)|_a^b\)</span>,
 <span class="math">\(\psi(x)\)</span> always takes the upwind value at element boundaries.</p>
 <div class="math">
 \[\mu \cdot \mathbf n \hat{F}  = \mu \cdot \mathbf n \psi^{\uparrow}\]</div>
-<p>Equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-dg_fe_bound">(14)</a> can now be evaluated. If
+<p>Equation <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-dg_fe_bound">(16)</a> can now be evaluated. If
 <span class="math">\(\mu \cdot \mathbf n &gt; 0\)</span>:</p>
 <div class="math">
 \[\begin{split}B_{ep_1} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_{p_1} =
@@ -284,9 +300,9 @@ element side: <span class="math">\(u_e|_p=\lim_{x \to p^e}\psi(x)\)</span>.</p>
     1      &amp; 0
 \end{bmatrix}
 \mathbf u_p^T\end{split}\]</div>
-<p>And the sum over both edges is given by <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-ele_sum">(15)</a>.</p>
+<p>And the sum over both edges is given by <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-ele_sum">(17)</a>.</p>
 <div class="math" id="equation-ele_sum">
-<span class="eqno">(15)</span>\[B_{ep_1} + B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_a^b\]</div>
+<span class="eqno">(17)</span>\[B_{ep_1} + B_{ep_2} = \mu \cdot \hat{\mathbf n} \hat{F}  v(x)|_a^b\]</div>
 </div>
 <div class="section" id="average-flux-formulation">
 <h3>Average Flux Formulation</h3>
@@ -332,7 +348,7 @@ identity matrix. Collapsing further:</p>
 <span class="math">\(\mathbf u=\{u_0, u_1, ...\}\)</span>, over all elements that best
 satisfies the overall weak form of the neutron balance equation
 <a class="reference internal" href="2017/08/23/dgfe_spatial_discretization_of_the_1d_transport_equation.html#equation-1d_tr_weak">(3)</a>. One can think of the finite element method in an
-optimization context.  For more information see notes on the weighted residual method.</p>
+optimization context.  For more information see notes on the <a class="reference external" href="https://wikipedia.org/wiki/Method_of_mean_weighted_residuals">weighted residual method</a>.</p>
 <p>To assemble the global system matrix <span class="math">\(\mathbf A\)</span>, the individual element
 matrices are “stamped” into <span class="math">\(\mathbf A\)</span>. Since each node in the
 mesh is assigned a <em>unique ID</em> the elements of <span class="math">\(A_e\)</span> can be copied

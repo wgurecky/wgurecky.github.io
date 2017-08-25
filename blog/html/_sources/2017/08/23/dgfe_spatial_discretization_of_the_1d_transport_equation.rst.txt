@@ -47,7 +47,7 @@ Next the equation is integrated over the domain, :math:`x \in [0, L]`:
 
 This is known as the `weak form`_ of equation :eq:`1d_tr_dg`.
 
-.. _weak form: https://wikipedia.com/weak_form
+.. _weak form: https://wikipedia.org/wiki/Weak_formulation
 
 Next, we integrate the first term in :eq:`1d_tr_weak` by parts giving:
 
@@ -56,7 +56,7 @@ Next, we integrate the first term in :eq:`1d_tr_weak` by parts giving:
    :label: 1d_tr_weak2
 
 We are free to choose a functional form for :math:`v(x)`. In the
-Galerkin approach, the test function is taken to be of the same
+`Bubnov-Galerkin`_ approach, the test function is taken to be of the same
 functional form as the solution approximation :math:`\psi(x)`. The
 simple DGFE choice is to take :math:`v(x)` to be a linear combination of
 ramp functions. Each ramp function, :math:`h_{ei}(x)`, is supported only
@@ -68,15 +68,17 @@ element is defined to be the region between bounding nodes which are
 points at which the solution is supported. For simplicity all elements
 are assumed to have width :math:`\Delta x`.
 
+.. _Bubnov-Galerkin: https://wikiversity.org/wiki/Nonlinear_finite_elements/Bubnov_Galerkin_method
+
 .. figure:: images/single_ele.png
    :alt: Single finite element.
-   :width: 5.00000cm
+   :width: 6.00000cm
 
    Single finite element.
 
 .. figure:: images/multi_ele.png
    :alt: Multiple DG finite elements.
-   :width: 8.00000cm
+   :width: 12.00000cm
 
    Multiple DG finite elements.
 
@@ -119,16 +121,44 @@ and
                                       0 & \text{, $otherwise$} 
      \end{cases}
 
-As previously stated, the Galerkin approach is to enforce :eq:`gal_asm`.
+To justify the next statements, we need to define the (local element) residual by :eq:`loc_resid`.
+Since the solution is approximated over element by equation :eq:`sol_ele`, we have no reason to
+believe the residual will actually be equal to 0 over each element (as would be the case if the original equation
+was satisfied exactly, everywhere in the domain.)
 
 .. math::
-   \psi_e(x) = v_e(x)
+    R_e(x) = \mu \frac{\partial}{\partial x} \psi_e(x) + \Sigma_t \psi_e(x) - S_e(x)
+    :label: loc_resid
+
+So that we may write the weak from:
+
+.. math::
+    \int_a^b R_e(x) v_e(x) dx = 0
+    :label: alt_weak
+
+In an approximate setting we would like the left hand side to be as close to zero as possible - we will have
+to choose the trial functions and the weights of the solution approximation, :math:`u_{ei}`,
+to satisfy this condition.  Of course the trivial solution of :math:`v_e(x)=0` everywhere is of no use.
+In reality, the choice of :math:`v_e(x)` is driven by physical arguments (do we need upwinding?, do we need
+more accuracy? ect.) but can seem quite arbitrary.
+
+As previously stated, the `Bubnov-Galerkin`_ approach is to enforce :eq:`gal_asm`.
+
+.. math::
+   v_e(x) = \nu_{eL}h_{e1}(x) + \nu_{eR}h_{e2}(x) = \sum_i \nu_{ei} h_{ei}(x)
    :label: gal_asm
+
+In this example we take the weights of the test function, :math:`\nu_{ei}`, to be:
+
+.. math::
+   \nu_{eL} = u_{eL},\ \nu_{eR}=u_{eR}
 
 on each element. At first glance this appears to be an arbitrary
 choice, and indeed, this assumption does not have to be made. One could
 use different functional families for :math:`\psi` and :math:`v`,
-however we will not investigate this option here.
+however we will not investigate this option here (see the `Petrov-Galerkin`_ method).
+
+.. _Petrov-Galerkin: https://wikipedia.org/wiki/Petrov-Galerkin_method
 
 In this case each element has two unknown supporting
 values, :math:`\{u_{eL}, u_{eR}\}`, that act to scale the ramp functions
@@ -161,8 +191,7 @@ in :eq:`1d_tr_weak_ele` integrates to :eq:`w_e`.
    :label: w_e
 
 With :math:`\mathbf u_e = [u_{eL}, u_{eR}]`. Note that this produces an
-asymmetric element matrix. As a consequence, it is required that the
-order of the nodes from left to right is preserved.
+asymmetric element matrix.
 
 The third term in :eq:`1d_tr_weak_ele` integrates to :eq:`m_e`.
 
@@ -208,8 +237,8 @@ normal for element :math:`e_1` is depicted in the figure:
    :width: 8.00000cm
 
 Outward normal on left face of element :math:`e_1`. As drawn,
-:math:`\psi_{1L}^{\uparrow}=u_{e_0, 2}` and
-:math:`\psi_{1L}^{\downarrow}=u_{e_1, 1}` in the figure.
+:math:`\psi_{1L}^{\uparrow}=u_{e_{0, R}}` and
+:math:`\psi_{1L}^{\downarrow}=u_{e_{1, L}}` in the figure.
 
 It is useful to define a jump and average condition on an element
 boundary. The average condition at the junction between two elements is
@@ -220,7 +249,7 @@ given by :eq:`avg`.
     :label: avg
 
 Where the subscript :math:`p` denotes evaluation at a boundary. Since
-:math:`\psi(x)|_p` and therefore :math:`u_p` is double valued at the
+:math:`\psi(x)|_p` is double valued at the
 element boundaries; the limit approaching from the left is not equal to
 the limit approaching from the right.
 
@@ -230,9 +259,9 @@ And the jump is provided by equation :eq:`jmp`.
     [[u]]_p =  (\lim_{x \to p^+} \psi(x) - \lim_{x \to p^-} \psi(x))
     :label: jmp
 
-Now it is useful define the “upwind” flux. According to :eq:`upwind`, the
+Now we define the “upwind” flux. According to :eq:`upwind`, the
 sign of the dot product between the current neutron flow direction,
-:math:`\mu` and the boundary normal vector :math:`\mathbf n_{e,p}` can
+:math:`\mu` and the boundary normal vector :math:`\mathbf n_e|p` can
 be used at each edge to determine the upwind flux value.
 
 .. math::
@@ -249,8 +278,8 @@ current element.
 It is unclear what value to choose for the flux at the element
 boundaries. This is required to evaluate
 :math:`\mu \psi_e(x) v_e(x)|_a^b` in :eq:`1d_tr_weak_ele`.
-The numerical flux is introduced
-:math:`\mu \cdot \mathbf n \hat{F}` to resolve this issue. The boundary
+The numerical flux, :math:`\mu \cdot \mathbf n \hat{F}`, is introduced
+to address this issue. The boundary
 term becomes :eq:`dg_fe_bound`.
 
 .. math::
@@ -355,7 +384,9 @@ The goal is to find the combination of the scaling factors,
 :math:`\mathbf u=\{u_0, u_1, ...\}`, over all elements that best
 satisfies the overall weak form of the neutron balance equation
 :eq:`1d_tr_weak`. One can think of the finite element method in an
-optimization context.  For more information see notes on the weighted residual method.
+optimization context.  For more information see notes on the `weighted residual method`_.
+
+.. _weighted residual method: https://wikipedia.org/wiki/Method_of_mean_weighted_residuals
 
 To assemble the global system matrix :math:`\mathbf A`, the individual element
 matrices are “stamped” into :math:`\mathbf A`. Since each node in the
